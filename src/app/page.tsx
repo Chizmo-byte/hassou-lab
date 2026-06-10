@@ -1,65 +1,113 @@
-import Image from "next/image";
+const experiments = [
+  {
+    code: "EXP-001",
+    title: "Coming Soon...",
+    desc: "新しい実験ツールを調合中。常識を溶かす試薬を準備しています。",
+  },
+  {
+    code: "EXP-002",
+    title: "Coming Soon...",
+    desc: "AIが生成する『奇妙な面白さ』を培養中。もう少しお待ちを。",
+  },
+  {
+    code: "EXP-003",
+    title: "Coming Soon...",
+    desc: "不気味で予測不能なジェネレーターを開発中。期待していてください。",
+  },
+  {
+    code: "EXP-004",
+    title: "Coming Soon...",
+    desc: "まだ名前すらない実験。最高にエキサイティングな何か。",
+  },
+];
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+    <div className="relative flex min-h-screen flex-1 flex-col overflow-hidden bg-black text-zinc-100">
+      {/* 背景グリッド & グロー */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 opacity-[0.18]"
+        style={{
+          backgroundImage:
+            "linear-gradient(rgba(34,211,238,0.35) 1px, transparent 1px), linear-gradient(90deg, rgba(34,211,238,0.35) 1px, transparent 1px)",
+          backgroundSize: "44px 44px",
+        }}
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -top-40 left-1/2 h-[480px] w-[480px] -translate-x-1/2 rounded-full bg-cyan-500/20 blur-[120px]"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute bottom-0 right-0 h-[360px] w-[360px] rounded-full bg-lime-400/15 blur-[120px]"
+      />
+
+      {/* ヒーローセクション */}
+      <main className="relative z-10 mx-auto flex w-full max-w-5xl flex-1 flex-col items-center px-6 pb-24 pt-28 text-center sm:pt-36">
+        <span className="mb-6 inline-flex items-center gap-2 rounded-full border border-cyan-400/40 bg-cyan-400/5 px-4 py-1.5 font-mono text-xs uppercase tracking-[0.25em] text-cyan-300">
+          <span className="h-2 w-2 animate-pulse rounded-full bg-lime-400 shadow-[0_0_10px_2px_rgba(163,230,53,0.8)]" />
+          Digital Experiment Lab
+        </span>
+
+        <h1 className="bg-gradient-to-b from-white via-white to-cyan-200/80 bg-clip-text text-6xl font-black uppercase tracking-tight text-transparent drop-shadow-[0_0_30px_rgba(34,211,238,0.35)] sm:text-8xl">
+          Hassou Lab
+        </h1>
+
+        <p className="mt-8 max-w-2xl text-balance text-xl font-semibold text-lime-300 drop-shadow-[0_0_18px_rgba(163,230,53,0.35)] sm:text-2xl">
+          常識を壊し、AIで『新しい面白さ』を生成する。
+        </p>
+
+        <p className="mt-4 max-w-xl text-balance text-base leading-relaxed text-zinc-400 sm:text-lg">
+          不気味で、奇妙で、最高にエキサイティングな実験場へようこそ。
+        </p>
+
+        {/* 実験ツール・ギャラリー */}
+        <section className="mt-24 w-full">
+          <div className="mb-8 flex items-center gap-4">
+            <h2 className="font-mono text-sm uppercase tracking-[0.3em] text-cyan-400">
+              // Experiment Gallery
+            </h2>
+            <div className="h-px flex-1 bg-gradient-to-r from-cyan-400/50 to-transparent" />
+          </div>
+
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {experiments.map((exp) => (
+              <article
+                key={exp.code}
+                className="group relative overflow-hidden rounded-xl border border-white/10 bg-white/[0.02] p-6 text-left backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-cyan-400/60 hover:bg-cyan-400/[0.04] hover:shadow-[0_0_30px_-5px_rgba(34,211,238,0.4)]"
+              >
+                <div
+                  aria-hidden
+                  className="absolute right-4 top-4 font-mono text-[10px] tracking-widest text-zinc-600 transition-colors group-hover:text-lime-400"
+                >
+                  {exp.code}
+                </div>
+                <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-lg border border-cyan-400/30 bg-black/40 font-mono text-xl text-cyan-300 transition-all group-hover:border-lime-400/60 group-hover:text-lime-300">
+                  ?
+                </div>
+                <h3 className="text-lg font-bold text-zinc-100 transition-colors group-hover:text-cyan-300">
+                  {exp.title}
+                </h3>
+                <p className="mt-2 text-sm leading-relaxed text-zinc-500">
+                  {exp.desc}
+                </p>
+                <div className="mt-5 inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-widest text-zinc-600">
+                  <span className="h-1.5 w-1.5 rounded-full bg-zinc-600 group-hover:animate-pulse group-hover:bg-lime-400" />
+                  Status: Incubating
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
       </main>
+
+      {/* フッター */}
+      <footer className="relative z-10 border-t border-white/10 py-8">
+        <p className="text-center font-mono text-sm tracking-widest text-zinc-500">
+          © 2026 Chizmo
+        </p>
+      </footer>
     </div>
   );
 }

@@ -1,8 +1,12 @@
+import Link from "next/link";
+
 const experiments = [
   {
     code: "EXP-001",
-    title: "Coming Soon...",
-    desc: "新しい実験ツールを調合中。常識を溶かす試薬を準備しています。",
+    title: "ニッチ掛け合わせ思考機",
+    desc: "2つの異なる要素を掛け合わせ、最高にエッジの効いたプロンプトを生成する。",
+    href: "/combine",
+    status: "active" as const,
   },
   {
     code: "EXP-002",
@@ -72,32 +76,77 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {experiments.map((exp) => (
-              <article
-                key={exp.code}
-                className="group relative overflow-hidden rounded-xl border border-white/10 bg-white/[0.02] p-6 text-left backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-cyan-400/60 hover:bg-cyan-400/[0.04] hover:shadow-[0_0_30px_-5px_rgba(34,211,238,0.4)]"
-              >
-                <div
-                  aria-hidden
-                  className="absolute right-4 top-4 font-mono text-[10px] tracking-widest text-zinc-600 transition-colors group-hover:text-lime-400"
+            {experiments.map((exp) => {
+              const isActive = exp.status === "active";
+
+              const cardBody = (
+                <>
+                  <div
+                    aria-hidden
+                    className={`absolute right-4 top-4 font-mono text-[10px] tracking-widest transition-colors ${
+                      isActive
+                        ? "text-lime-400"
+                        : "text-zinc-600 group-hover:text-lime-400"
+                    }`}
+                  >
+                    {exp.code}
+                  </div>
+                  <div
+                    className={`mb-5 flex h-12 w-12 items-center justify-center rounded-lg border bg-black/40 font-mono text-xl transition-all ${
+                      isActive
+                        ? "border-lime-400/60 text-lime-300"
+                        : "border-cyan-400/30 text-cyan-300 group-hover:border-lime-400/60 group-hover:text-lime-300"
+                    }`}
+                  >
+                    {isActive ? "⚡" : "?"}
+                  </div>
+                  <h3
+                    className={`text-lg font-bold transition-colors ${
+                      isActive
+                        ? "text-lime-300"
+                        : "text-zinc-100 group-hover:text-cyan-300"
+                    }`}
+                  >
+                    {exp.title}
+                  </h3>
+                  <p className="mt-2 text-sm leading-relaxed text-zinc-500">
+                    {exp.desc}
+                  </p>
+                  {isActive ? (
+                    <div className="mt-5 inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-widest text-lime-400">
+                      <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-lime-400 shadow-[0_0_8px_2px_rgba(163,230,53,0.8)]" />
+                      Status: Active →
+                    </div>
+                  ) : (
+                    <div className="mt-5 inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-widest text-zinc-600">
+                      <span className="h-1.5 w-1.5 rounded-full bg-zinc-600 group-hover:animate-pulse group-hover:bg-lime-400" />
+                      Status: Incubating
+                    </div>
+                  )}
+                </>
+              );
+
+              if (isActive && exp.href) {
+                return (
+                  <Link
+                    key={exp.code}
+                    href={exp.href}
+                    className="group relative overflow-hidden rounded-xl border border-lime-400/50 bg-lime-400/[0.04] p-6 text-left backdrop-blur-sm shadow-[0_0_30px_-8px_rgba(163,230,53,0.5)] transition-all duration-300 hover:-translate-y-1 hover:border-lime-400/80 hover:bg-lime-400/[0.08] hover:shadow-[0_0_36px_-4px_rgba(163,230,53,0.7)]"
+                  >
+                    {cardBody}
+                  </Link>
+                );
+              }
+
+              return (
+                <article
+                  key={exp.code}
+                  className="group relative overflow-hidden rounded-xl border border-white/10 bg-white/[0.02] p-6 text-left backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-cyan-400/60 hover:bg-cyan-400/[0.04] hover:shadow-[0_0_30px_-5px_rgba(34,211,238,0.4)]"
                 >
-                  {exp.code}
-                </div>
-                <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-lg border border-cyan-400/30 bg-black/40 font-mono text-xl text-cyan-300 transition-all group-hover:border-lime-400/60 group-hover:text-lime-300">
-                  ?
-                </div>
-                <h3 className="text-lg font-bold text-zinc-100 transition-colors group-hover:text-cyan-300">
-                  {exp.title}
-                </h3>
-                <p className="mt-2 text-sm leading-relaxed text-zinc-500">
-                  {exp.desc}
-                </p>
-                <div className="mt-5 inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-widest text-zinc-600">
-                  <span className="h-1.5 w-1.5 rounded-full bg-zinc-600 group-hover:animate-pulse group-hover:bg-lime-400" />
-                  Status: Incubating
-                </div>
-              </article>
-            ))}
+                  {cardBody}
+                </article>
+              );
+            })}
           </div>
         </section>
       </main>

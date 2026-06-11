@@ -10,7 +10,7 @@ const experiments = [
   },
   {
     code: "EXP-002",
-    title: "COLLAPSE BONSAI",
+    title: "次元崩壊盆栽",
     desc: "観測することが、破壊になる。",
     href: "/collapse",
     status: "active" as const,

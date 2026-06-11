@@ -81,3 +81,12 @@ body {
   animation: seed-pulse 2s ease-in-out infinite;
   cursor: pointer;
 }
+
+/* ナビ / ロアリンクの控えめなライムグリーン・グロー */
+.back-to-lab-link:hover {
+  text-shadow: 0 0 8px rgba(74, 222, 128, 0.8), 0 0 20px rgba(74, 222, 128, 0.4);
+}
+
+.lore-link:hover {
+  text-shadow: 0 0 6px rgba(74, 222, 128, 0.6);
+}

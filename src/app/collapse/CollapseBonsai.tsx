@@ -108,7 +108,6 @@ export default function CollapseBonsai() {
   const [opacity, setOpacity] = useState(1);
   const [fadeDuration, setFadeDuration] = useState(0.5); // 画像フェード秒数（VOID→REBIRTH のみ長くする）
   const [glitchActive, setGlitchActive] = useState(false);
-  const [isHovering, setIsHovering] = useState(false);
   const [pokeCount, setPokeCount] = useState(0); // クリック累計回数
   const [pokeEffect, setPokeEffect] = useState(false); // 波紋エフェクト表示フラグ
   const [pokeMessage, setPokeMessage] = useState(false); // メッセージ表示フラグ
@@ -151,24 +150,19 @@ export default function CollapseBonsai() {
   }, []);
 
   // ステージが切り替わった瞬間だけ、仮想開始時刻をリセットする。
-  // （poke / hover による再計算ではリセットしないよう、依存は [stage] のみ）
+  // （poke による再計算ではリセットしないよう、依存は [stage] のみ）
   useEffect(() => {
     stageStartTime.current = Date.now();
   }, [stage]);
 
   // ステージ進行タイマー。
   //   - 経過時間ベースで「残り時間」を算出して setTimeout を張り直す方式。
-  //   - Stage 1・2 はホバー中に全体尺を 40% 短縮（加速）。
-  //   - poke は stageStartTime を過去にずらして残り時間を縮める（pokeCount 依存で再計算）。
+  //   - 加速手段は poke クリックのみ（stageStartTime を過去にずらして残り時間を縮める）。
   useEffect(() => {
     if (stage === 4) return; // REBIRTH はクリック待ち
 
     const currentStage = STAGES[stage];
-    const baseDuration = currentStage.duration ?? 0;
-    const totalDuration =
-      (stage === 1 || stage === 2) && isHovering
-        ? baseDuration * 0.6
-        : baseDuration;
+    const totalDuration = currentStage.duration ?? 0;
     const elapsed = Date.now() - stageStartTime.current;
     const remaining = Math.max(0, totalDuration - elapsed);
 
@@ -201,7 +195,7 @@ export default function CollapseBonsai() {
       if (transitionTimer) clearTimeout(transitionTimer);
       if (glitchInterval) clearInterval(glitchInterval);
     };
-  }, [stage, isHovering, pokeCount]);
+  }, [stage, pokeCount]);
 
   // VOID（Stage 3）専用演出：残響テキスト＋問いかけ。
   useEffect(() => {
@@ -381,19 +375,13 @@ export default function CollapseBonsai() {
           } ${
             glitchActive && current.glitchIntensity === 2 ? "glitch-strong" : ""
           } ${pokeEffect ? "poke-effect" : ""}`}
-          onMouseEnter={() =>
-            (stage === 1 || stage === 2) && setIsHovering(true)
-          }
-          onMouseLeave={() => setIsHovering(false)}
         />
       </div>
 
       {/* ステータステキスト（下部） */}
       <div className="absolute bottom-20 left-0 right-0 z-10 px-8 text-center">
         <p className="mx-auto max-w-lg text-sm leading-relaxed text-gray-400">
-          {isHovering && stage === 1 && "あなたの視線が、崩壊を加速させています。"}
-          {isHovering && stage === 2 && "もう、止まらない。"}
-          {!isHovering && current.statusJa}
+          {current.statusJa}
         </p>
 
         {/* 干渉メッセージ（クリック直後2秒間表示） */}

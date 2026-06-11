@@ -53,7 +53,7 @@ const STAGES = [
     id: 3,
     name: "VOID",
     image: "/hassou-lab/bonsai/Late_Collapse.png",
-    duration: 10000, // 10秒（長めの静寂）
+    duration: 18000, // 18秒（長めの静寂）
     statusJa: "個体は消滅しました。あとに残ったのは、次元の記憶だけです。",
     glitchIntensity: 0,
   },
@@ -106,6 +106,7 @@ function ProgressBar({ stage }: { stage: number }) {
 export default function CollapseBonsai() {
   const [stage, setStage] = useState(0);
   const [opacity, setOpacity] = useState(1);
+  const [fadeDuration, setFadeDuration] = useState(0.5); // 画像フェード秒数（VOID→REBIRTH のみ長くする）
   const [glitchActive, setGlitchActive] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
   const [pokeCount, setPokeCount] = useState(0); // クリック累計回数
@@ -171,13 +172,17 @@ export default function CollapseBonsai() {
     const elapsed = Date.now() - stageStartTime.current;
     const remaining = Math.max(0, totalDuration - elapsed);
 
+    // VOID(3)→REBIRTH(4) のみ 2.5秒かけてゆっくり暗転、他は従来どおり 0.5秒。
+    const fadeOutMs = stage === 3 ? 2500 : 500;
+
     let transitionTimer: ReturnType<typeof setTimeout> | undefined;
     const timer = setTimeout(() => {
+      setFadeDuration(fadeOutMs / 1000); // 遷移直前にフェード尺を反映
       setOpacity(0); // フェードアウト
       transitionTimer = setTimeout(() => {
         setStage((prev) => prev + 1);
         setOpacity(1);
-      }, 500);
+      }, fadeOutMs);
     }, remaining);
 
     // グリッチエフェクト（Stage 1・2 のみ）
@@ -360,15 +365,13 @@ export default function CollapseBonsai() {
       </div>
 
       {/* メイン画像エリア */}
-      <div
-        className={`relative ${stage === 3 ? "stage-void" : ""}`}
-        style={{ opacity, transition: "opacity 0.5s ease" }}
-      >
+      <div className={`relative ${stage === 3 ? "void-image-container" : ""}`}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={current.image ?? ""}
           alt={`bonsai stage ${stage}`}
           onClick={handlePoke}
+          style={{ opacity, transition: `opacity ${fadeDuration}s ease` }}
           className={`bonsai-image max-h-[70vh] w-auto cursor-crosshair object-contain ${
             glitchActive && current.glitchIntensity === 1 ? "glitch-weak" : ""
           } ${

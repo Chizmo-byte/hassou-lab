@@ -28,7 +28,7 @@ const STAGES = [
     id: 0,
     name: "OBSERVING",
     image: "/hassou-lab/bonsai/not_collapsed.png",
-    duration: 6000, // 6秒
+    duration: 12000, // 12秒
     statusJa:
       "この個体は安定しています。しかし、あなたの視線が次元に干渉し始めています。",
     glitchIntensity: 0,
@@ -37,7 +37,7 @@ const STAGES = [
     id: 1,
     name: "UNSTABLE",
     image: "/hassou-lab/bonsai/Early_Collapse.png",
-    duration: 10000, // 10秒
+    duration: 20000, // 20秒
     statusJa: "次元の壁に亀裂が入りました。形態が維持できなくなりつつあります。",
     glitchIntensity: 1,
   },
@@ -45,7 +45,7 @@ const STAGES = [
     id: 2,
     name: "COLLAPSING",
     image: "/hassou-lab/bonsai/Mid_Collapse.png",
-    duration: 15000, // 15秒
+    duration: 25000, // 25秒
     statusJa: "観測の暴力が限界を超えました。形態が崩壊しています。",
     glitchIntensity: 2,
   },
@@ -53,7 +53,7 @@ const STAGES = [
     id: 3,
     name: "VOID",
     image: "/hassou-lab/bonsai/Late_Collapse.png",
-    duration: 18000, // 18秒（長めの静寂）
+    duration: 35000, // 35秒（長めの静寂）
     statusJa: "個体は消滅しました。あとに残ったのは、次元の記憶だけです。",
     glitchIntensity: 0,
   },
@@ -212,8 +212,12 @@ export default function CollapseBonsai() {
       const text =
         ECHO_FRAGMENTS[Math.floor(Math.random() * ECHO_FRAGMENTS.length)];
       const id = echoIdRef.current++;
-      const x = 5 + Math.random() * 70; // 画面幅 5〜75%
-      const y = 10 + Math.random() * 70; // 画面高 10〜80%
+      // 中央（y:40〜60%）は問いかけ表示エリアなので回避し、上下2ゾーンへ振り分ける。
+      const x = 30 + Math.random() * 40; // 横は中央寄り 30〜70%
+      const y =
+        Math.random() < 0.5
+          ? 10 + Math.random() * 25 // 上ゾーン：10〜35%
+          : 65 + Math.random() * 15; // 下ゾーン：65〜80%
 
       setEchoFragments((prev) => [...prev, { id, text, x, y }]);
       setTimeout(() => {

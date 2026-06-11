@@ -10,8 +10,10 @@ const experiments = [
   },
   {
     code: "EXP-002",
-    title: "Coming Soon...",
-    desc: "AIが生成する『奇妙な面白さ』を培養中。もう少しお待ちを。",
+    title: "COLLAPSE BONSAI",
+    desc: "観測することが、破壊になる。",
+    href: "/collapse",
+    status: "active" as const,
   },
   {
     code: "EXP-003",

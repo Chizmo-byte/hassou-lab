@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 // ページ最下部に常時表示するロアテキスト（/combine への物語的接続）。
 function LoreText() {
@@ -68,6 +68,27 @@ const STAGES = [
 ] as const;
 
 const CYCLE_KEY = "bonsai-cycle-count";
+const POKE_ACCELERATION_MS = 2000; // 1クリックで2秒加速
+
+// VOID（Stage 3）演出：ランダムに浮かぶ残響テキスト
+const ECHO_FRAGMENTS = [
+  "// ERROR: EMOTION_LEAKED",
+  "// 観測者の心拍数：上昇中",
+  "// 記憶の破片：[ 剪定 ] [ 絶望 ] [ 再生 ]",
+  "// 警告：次元の境界線が曖昧になっています",
+  "// 形態記憶 0.3% 残存",
+  "ERR: DIMENSION_LEAK",
+  "// まだ、ここにいる",
+  "// OBSERVER_ID: 検出済み",
+];
+
+// VOID（Stage 3）演出：中央に1文字ずつ表示される問いかけ
+const INTERROGATIONS = [
+  "壊すことに、心地よさを感じましたか？",
+  "次の個体は、もっと美しく壊れるかもしれません。",
+  "あなたは、救いたいのか。それとも、壊したいのか。",
+  "あなたは、なぜ見続けているのですか？",
+];
 
 function ProgressBar({ stage }: { stage: number }) {
   if (stage === 4) return null;
@@ -87,12 +108,31 @@ export default function CollapseBonsai() {
   const [opacity, setOpacity] = useState(1);
   const [glitchActive, setGlitchActive] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
+  const [pokeCount, setPokeCount] = useState(0); // クリック累計回数
+  const [pokeEffect, setPokeEffect] = useState(false); // 波紋エフェクト表示フラグ
+  const [pokeMessage, setPokeMessage] = useState(false); // メッセージ表示フラグ
   const [cycleCount, setCycleCount] = useState(() => {
     if (typeof window !== "undefined") {
       return parseInt(localStorage.getItem(CYCLE_KEY) || "0", 10);
     }
     return 0;
   });
+
+  // VOID 残響テキスト（複数同時表示）
+  const [echoFragments, setEchoFragments] = useState<
+    { id: number; text: string; x: number; y: number }[]
+  >([]);
+
+  // VOID 問いかけテキスト（1文字ずつ表示）
+  const [interrogationChars, setInterrogationChars] = useState<string[]>([]);
+  const [showInterrogation, setShowInterrogation] = useState(false);
+
+  // 残響テキストの ID 採番用
+  const echoIdRef = useRef(0);
+
+  // 現ステージの「仮想的な開始時刻」。poke で過去にずらすことで残り時間を短縮する。
+  // 実値は下の [stage] エフェクト（タイマー算出より先に実行）でマウント時に設定する。
+  const stageStartTime = useRef<number>(0);
 
   // 4枚をマウント時にプリロードしてステージ遷移時のチラつきを防ぐ。
   // ※ next/image は使わず、ブラウザ標準の Image を利用する。
@@ -109,16 +149,27 @@ export default function CollapseBonsai() {
     });
   }, []);
 
-  // ステージ進行タイマー。Stage 1・2 はホバー中に 40% 加速する。
+  // ステージが切り替わった瞬間だけ、仮想開始時刻をリセットする。
+  // （poke / hover による再計算ではリセットしないよう、依存は [stage] のみ）
+  useEffect(() => {
+    stageStartTime.current = Date.now();
+  }, [stage]);
+
+  // ステージ進行タイマー。
+  //   - 経過時間ベースで「残り時間」を算出して setTimeout を張り直す方式。
+  //   - Stage 1・2 はホバー中に全体尺を 40% 短縮（加速）。
+  //   - poke は stageStartTime を過去にずらして残り時間を縮める（pokeCount 依存で再計算）。
   useEffect(() => {
     if (stage === 4) return; // REBIRTH はクリック待ち
 
     const currentStage = STAGES[stage];
     const baseDuration = currentStage.duration ?? 0;
-    const effectiveDuration =
+    const totalDuration =
       (stage === 1 || stage === 2) && isHovering
         ? baseDuration * 0.6
         : baseDuration;
+    const elapsed = Date.now() - stageStartTime.current;
+    const remaining = Math.max(0, totalDuration - elapsed);
 
     let transitionTimer: ReturnType<typeof setTimeout> | undefined;
     const timer = setTimeout(() => {
@@ -127,7 +178,7 @@ export default function CollapseBonsai() {
         setStage((prev) => prev + 1);
         setOpacity(1);
       }, 500);
-    }, effectiveDuration);
+    }, remaining);
 
     // グリッチエフェクト（Stage 1・2 のみ）
     let glitchInterval: ReturnType<typeof setInterval> | undefined;
@@ -145,7 +196,66 @@ export default function CollapseBonsai() {
       if (transitionTimer) clearTimeout(transitionTimer);
       if (glitchInterval) clearInterval(glitchInterval);
     };
-  }, [stage, isHovering]);
+  }, [stage, isHovering, pokeCount]);
+
+  // VOID（Stage 3）専用演出：残響テキスト＋問いかけ。
+  useEffect(() => {
+    if (stage !== 3) return;
+
+    // 残響テキスト：2.5秒ごとにランダム位置へ出現 → 3秒後に削除
+    const echoInterval = setInterval(() => {
+      const text =
+        ECHO_FRAGMENTS[Math.floor(Math.random() * ECHO_FRAGMENTS.length)];
+      const id = echoIdRef.current++;
+      const x = 5 + Math.random() * 70; // 画面幅 5〜75%
+      const y = 10 + Math.random() * 70; // 画面高 10〜80%
+
+      setEchoFragments((prev) => [...prev, { id, text, x, y }]);
+      setTimeout(() => {
+        setEchoFragments((prev) => prev.filter((f) => f.id !== id));
+      }, 3000);
+    }, 2500);
+
+    // 問いかけ：2秒後に1つ選び、1文字ずつ（120ms間隔）表示
+    const interrogationTimer = setTimeout(() => {
+      const text =
+        INTERROGATIONS[Math.floor(Math.random() * INTERROGATIONS.length)];
+      setShowInterrogation(true);
+      setInterrogationChars([]);
+      text.split("").forEach((char, i) => {
+        setTimeout(() => {
+          setInterrogationChars((prev) => [...prev, char]);
+        }, i * 120);
+      });
+    }, 2000);
+
+    // ステージ離脱時に残響・問いかけをクリア
+    return () => {
+      clearInterval(echoInterval);
+      clearTimeout(interrogationTimer);
+      setEchoFragments([]);
+      setInterrogationChars([]);
+      setShowInterrogation(false);
+    };
+  }, [stage]);
+
+  // 盆栽への「接触」。波紋演出＋メッセージを出し、崩壊タイマーを加速させる。
+  const handlePoke = () => {
+    if (stage === 4) return; // REBIRTH では無効
+
+    setPokeCount((prev) => prev + 1); // 依存配列に入れてタイマーを再計算させる
+
+    // 波紋エフェクトを 150ms 表示
+    setPokeEffect(true);
+    setTimeout(() => setPokeEffect(false), 150);
+
+    // 干渉メッセージを 2秒表示
+    setPokeMessage(true);
+    setTimeout(() => setPokeMessage(false), 2000);
+
+    // 仮想開始時刻を過去にずらし、残り時間を縮める（＝加速）
+    stageStartTime.current -= POKE_ACCELERATION_MS;
+  };
 
   const handleRebirth = () => {
     const newCount = cycleCount + 1;
@@ -215,6 +325,28 @@ export default function CollapseBonsai() {
         </Link>
       </div>
 
+      {/* VOID（Stage 3）演出：残響テキスト＋問いかけ */}
+      {stage === 3 && (
+        <>
+          {echoFragments.map((fragment) => (
+            <div
+              key={fragment.id}
+              className="echo-fragment"
+              style={{ left: `${fragment.x}%`, top: `${fragment.y}%` }}
+            >
+              {fragment.text}
+            </div>
+          ))}
+
+          {showInterrogation && (
+            <div className="interrogation-text">
+              「{interrogationChars.join("")}
+              <span className="interrogation-cursor">_</span>」
+            </div>
+          )}
+        </>
+      )}
+
       {/* ステータスバー（上部） */}
       <div className="absolute left-0 right-0 top-8 z-10 text-center">
         <p className="text-xs tracking-[0.3em] text-green-400">
@@ -236,11 +368,12 @@ export default function CollapseBonsai() {
         <img
           src={current.image ?? ""}
           alt={`bonsai stage ${stage}`}
-          className={`bonsai-image max-h-[70vh] w-auto object-contain ${
+          onClick={handlePoke}
+          className={`bonsai-image max-h-[70vh] w-auto cursor-crosshair object-contain ${
             glitchActive && current.glitchIntensity === 1 ? "glitch-weak" : ""
           } ${
             glitchActive && current.glitchIntensity === 2 ? "glitch-strong" : ""
-          }`}
+          } ${pokeEffect ? "poke-effect" : ""}`}
           onMouseEnter={() =>
             (stage === 1 || stage === 2) && setIsHovering(true)
           }
@@ -255,6 +388,20 @@ export default function CollapseBonsai() {
           {isHovering && stage === 2 && "もう、止まらない。"}
           {!isHovering && current.statusJa}
         </p>
+
+        {/* 干渉メッセージ（クリック直後2秒間表示） */}
+        {pokeMessage && (
+          <p className="poke-message mt-2 text-center text-xs tracking-widest text-red-400">
+            あなたの接触が、崩壊を早めました。
+          </p>
+        )}
+
+        {/* クリック累計（1回以上クリックした場合のみ表示） */}
+        {pokeCount > 0 && !pokeMessage && (
+          <p className="mt-2 text-center text-xs tracking-widest text-gray-700">
+            干渉回数：{pokeCount}
+          </p>
+        )}
       </div>
 
       <LoreText />

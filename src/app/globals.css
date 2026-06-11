@@ -90,3 +90,73 @@ body {
 .lore-link:hover {
   text-shadow: 0 0 6px rgba(74, 222, 128, 0.6);
 }
+
+/* 波紋グリッチエフェクト（盆栽クリック時） */
+@keyframes poke-ripple {
+  0%   { transform: scale(1);    filter: brightness(1) hue-rotate(0deg); }
+  20%  { transform: scale(1.02); filter: brightness(2) hue-rotate(60deg); }
+  40%  { transform: scale(0.98); filter: brightness(1.5) hue-rotate(-60deg) saturate(3); }
+  60%  { transform: scale(1.01); filter: brightness(1.8) hue-rotate(120deg); }
+  100% { transform: scale(1);    filter: brightness(1) hue-rotate(0deg); }
+}
+
+.poke-effect {
+  animation: poke-ripple 0.15s steps(1) forwards;
+}
+
+/* 干渉メッセージ：フェードイン */
+@keyframes poke-message-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.poke-message {
+  animation: poke-message-in 0.2s ease forwards;
+}
+
+/* VOID 残響テキスト */
+.echo-fragment {
+  position: absolute;
+  font-family: monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  color: rgba(74, 222, 128, 0.4);
+  pointer-events: none;
+  animation: echo-fade 3s ease forwards;
+  z-index: 15;
+  white-space: nowrap;
+}
+
+@keyframes echo-fade {
+  0%   { opacity: 0; transform: translateY(4px); }
+  15%  { opacity: 1; transform: translateY(0); }
+  70%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* VOID 問いかけテキスト */
+.interrogation-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: monospace;
+  font-size: 0.9rem;
+  letter-spacing: 0.15em;
+  color: rgba(255, 255, 255, 0.6);
+  text-align: center;
+  pointer-events: none;
+  z-index: 20;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+/* 問いかけ末尾のカーソル点滅 */
+@keyframes cursor-blink {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0; }
+}
+
+.interrogation-cursor {
+  animation: cursor-blink 0.8s step-end infinite;
+  color: rgba(74, 222, 128, 0.8);
+}
